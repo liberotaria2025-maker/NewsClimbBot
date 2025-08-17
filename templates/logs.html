@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Historial - Bot de Twitter{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-list me-2"></i>Historial y Logs</h1>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" onclick="exportLogs()">
+                    <i class="fas fa-download me-1"></i>Exportar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Historial de Tweets -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fab fa-twitter me-2"></i>Historial de Tweets</h5>
+            </div>
+            <div class="card-body">
+                {% if tweets.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Contenido</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tweet in tweets.items %}
+                                    <tr>
+                                        <td>
+                                            <small>{{ tweet.posted_at.strftime('%d/%m/%Y') }}</small><br>
+                                            <small class="text-muted">{{ tweet.posted_at.strftime('%H:%M:%S') }}</small>
+                                        </td>
+                                        <td>
+                                            {% if tweet.tweet_type == 'weather' %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-cloud-sun me-1"></i>Clima
+                                                </span>
+                                            {% elif tweet.tweet_type == 'currency' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-dollar-sign me-1"></i>Moneda
+                                                </span>
+                                            {% elif tweet.tweet_type == 'news' %}
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-newspaper me-1"></i>Noticias
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-edit me-1"></i>Manual
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="tweet-content">
+                                                {{ tweet.content[:100] }}{% if tweet.content|length > 100 %}...{% endif %}
+                                            </div>
+                                            {% if tweet.content|length > 100 %}
+                                                <button class="btn btn-sm btn-link p-0" onclick="toggleFullContent(this)" 
+                                                        data-full-content="{{ tweet.content }}">
+                                                    Ver completo
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if tweet.success %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Exitoso
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger" 
+                                                      title="{{ tweet.error_message or 'Error desconocido' }}">
+                                                    <i class="fas fa-times me-1"></i>Error
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Paginación -->
+                    {% if tweets.pages > 1 %}
+                        <nav aria-label="Paginación de tweets">
+                            <ul class="pagination justify-content-center">
+                                {% if tweets.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('logs', page=tweets.prev_num) }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for page_num in tweets.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != tweets.page %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('logs', page=page_num) }}">{{ page_num }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ page_num }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">…</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if tweets.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('logs', page=tweets.next_num) }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay tweets en el historial</h5>
+                        <p class="text-muted">Los tweets publicados aparecerán aquí</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logs de APIs -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-server me-2"></i>Logs de APIs</h5>
+            </div>
+            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                {% if api_logs %}
+                    {% for log in api_logs %}
+                        <div class="api-log-item mb-3 p-2 border rounded">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <strong>{{ log.api_name }}</strong>
+                                    {% if log.status_code == 200 %}
+                                        <span class="badge bg-success ms-2">{{ log.status_code }}</span>
+                                    {% elif log.status_code == 0 %}
+                                        <span class="badge bg-danger ms-2">Error</span>
+                                    {% else %}
+                                        <span class="badge bg-warning ms-2">{{ log.status_code }}</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">
+                                    {{ log.created_at.strftime('%H:%M:%S') }}
+                                </small>
+                            </div>
+                            
+                            {% if log.response_time %}
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ "%.2f"|format(log.response_time) }}s
+                                </small>
+                            {% endif %}
+                            
+                            {% if log.error_message %}
+                                <div class="mt-1">
+                                    <small class="text-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ log.error_message[:100] }}{% if log.error_message|length > 100 %}...{% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            
+                            {% if log.endpoint %}
+                                <div class="mt-1">
+                                    <small class="text-muted font-monospace">
+                                        {{ log.endpoint[:50] }}{% if log.endpoint|length > 50 %}...{% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-server fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No hay logs de APIs disponibles</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleFullContent(button) {
+    const contentDiv = button.parentElement.querySelector('.tweet-content');
+    const fullContent = button.getAttribute('data-full-content');
+    const isExpanded = button.textContent === 'Ver menos';
+    
+    if (isExpanded) {
+        contentDiv.textContent = fullContent.substring(0, 100) + '...';
+        button.textContent = 'Ver completo';
+    } else {
+        contentDiv.textContent = fullContent;
+        button.textContent = 'Ver menos';
+    }
+}
+
+function exportLogs() {
+    // Implementar exportación de logs
+    alert('Funcionalidad de exportación en desarrollo');
+}
+
+// Auto-scroll para logs de APIs
+const apiLogsContainer = document.querySelector('.col-lg-4 .card-body');
+if (apiLogsContainer) {
+    // Mantener scroll en la parte superior para logs más recientes
+    apiLogsContainer.scrollTop = 0;
+}
+</script>
+{% endblock %}

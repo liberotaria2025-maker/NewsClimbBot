@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Bot de Twitter{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" onclick="refreshStats()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas principales -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="text-white">{{ total_tweets }}</h4>
+                        <p class="text-white-50 mb-0">Total Tweets</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fab fa-twitter fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="text-white">{{ today_tweets }}</h4>
+                        <p class="text-white-50 mb-0">Hoy</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calendar-day fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="text-white">{{ successful_tweets }}</h4>
+                        <p class="text-white-50 mb-0">Exitosos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="text-dark">{{ failed_tweets }}</h4>
+                        <p class="text-dark-50 mb-0">Fallidos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-dark-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <form method="POST" action="{{ url_for('test_tweet') }}">
+                            <input type="hidden" name="type" value="weather">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-cloud-sun me-2"></i>
+                                Publicar Clima
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <form method="POST" action="{{ url_for('test_tweet') }}">
+                            <input type="hidden" name="type" value="currency">
+                            <button type="submit" class="btn btn-outline-success w-100">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Publicar Dólar
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <form method="POST" action="{{ url_for('test_tweet') }}">
+                            <input type="hidden" name="type" value="news">
+                            <button type="submit" class="btn btn-outline-info w-100">
+                                <i class="fas fa-newspaper me-2"></i>
+                                Publicar Noticias
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos tweets -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Últimos Tweets</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_tweets %}
+                    <div class="list-group list-group-flush">
+                        {% for tweet in recent_tweets %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1">{{ tweet.content }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-tag me-1"></i>{{ tweet.tweet_type }}
+                                            <i class="fas fa-clock ms-3 me-1"></i>{{ tweet.posted_at.strftime('%d/%m/%Y %H:%M') }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        {% if tweet.success %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger" title="{{ tweet.error_message }}">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay tweets publicados aún</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-server me-2"></i>Estado APIs</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_api_logs %}
+                    {% for log in recent_api_logs %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>{{ log.api_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ log.created_at.strftime('%H:%M:%S') }}</small>
+                            </div>
+                            <div>
+                                {% if log.status_code == 200 %}
+                                    <span class="badge bg-success">OK</span>
+                                {% elif log.status_code == 0 %}
+                                    <span class="badge bg-danger">Error</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ log.status_code }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not loop.last %}<hr>{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-plug fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Sin logs de API</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshStats() {
+    // Actualizar estadísticas en tiempo real
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Actualizar contadores (esto requeriría elementos con IDs específicos)
+            console.log('Stats updated:', data);
+            location.reload(); // Por simplicidad, recargar la página
+        })
+        .catch(error => {
+            console.error('Error updating stats:', error);
+        });
+}
+
+// Auto-refresh cada 5 minutos
+setInterval(refreshStats, 300000);
+</script>
+{% endblock %}

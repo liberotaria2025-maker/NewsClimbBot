@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - Bot de Twitter{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-cog me-2"></i>Configuración</h1>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary" onclick="testConnections()">
+                    <i class="fas fa-plug me-1"></i>Probar Conexiones
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('config') }}">
+    <div class="row">
+        <!-- Configuración de Twitter -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fab fa-twitter text-primary me-2"></i>
+                        Credenciales de Twitter
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="twitter_consumer_key" class="form-label">Consumer Key (API Key)</label>
+                        <input type="text" class="form-control" id="twitter_consumer_key" 
+                               name="twitter_consumer_key" value="{{ config.twitter_consumer_key }}" 
+                               placeholder="Tu Twitter API Key">
+                        <div class="form-text">Obténla en <a href="https://developer.twitter.com" target="_blank">Twitter Developer Portal</a></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="twitter_consumer_secret" class="form-label">Consumer Secret (API Secret)</label>
+                        <input type="password" class="form-control" id="twitter_consumer_secret" 
+                               name="twitter_consumer_secret" value="{{ config.twitter_consumer_secret }}" 
+                               placeholder="Tu Twitter API Secret">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="twitter_access_token" class="form-label">Access Token</label>
+                        <input type="text" class="form-control" id="twitter_access_token" 
+                               name="twitter_access_token" value="{{ config.twitter_access_token }}" 
+                               placeholder="Tu Access Token">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="twitter_access_token_secret" class="form-label">Access Token Secret</label>
+                        <input type="password" class="form-control" id="twitter_access_token_secret" 
+                               name="twitter_access_token_secret" value="{{ config.twitter_access_token_secret }}" 
+                               placeholder="Tu Access Token Secret">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- APIs Externas -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cloud me-2"></i>
+                        APIs Externas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="openweather_api_key" class="form-label">OpenWeatherMap API Key</label>
+                        <input type="text" class="form-control" id="openweather_api_key" 
+                               name="openweather_api_key" value="{{ config.openweather_api_key }}" 
+                               placeholder="Tu OpenWeatherMap API Key">
+                        <div class="form-text">Gratis en <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="news_api_key" class="form-label">NewsAPI Key</label>
+                        <input type="text" class="form-control" id="news_api_key" 
+                               name="news_api_key" value="{{ config.news_api_key }}" 
+                               placeholder="Tu NewsAPI Key">
+                        <div class="form-text">Gratis en <a href="https://newsapi.org" target="_blank">NewsAPI</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Configuración de Contenido -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Configuración de Contenido
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="weather_city" class="form-label">Ciudad para Clima</label>
+                        <input type="text" class="form-control" id="weather_city" 
+                               name="weather_city" value="{{ config.weather_city }}" 
+                               placeholder="Buenos Aires">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currency_from" class="form-label">Moneda Base</label>
+                                <select class="form-select" id="currency_from" name="currency_from">
+                                    <option value="USD" {% if config.currency_from == 'USD' %}selected{% endif %}>USD</option>
+                                    <option value="EUR" {% if config.currency_from == 'EUR' %}selected{% endif %}>EUR</option>
+                                    <option value="GBP" {% if config.currency_from == 'GBP' %}selected{% endif %}>GBP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currency_to" class="form-label">Moneda Destino</label>
+                                <select class="form-select" id="currency_to" name="currency_to">
+                                    <option value="ARS" {% if config.currency_to == 'ARS' %}selected{% endif %}>ARS (Peso Argentino)</option>
+                                    <option value="BRL" {% if config.currency_to == 'BRL' %}selected{% endif %}>BRL (Real Brasileño)</option>
+                                    <option value="CLP" {% if config.currency_to == 'CLP' %}selected{% endif %}>CLP (Peso Chileno)</option>
+                                    <option value="MXN" {% if config.currency_to == 'MXN' %}selected{% endif %}>MXN (Peso Mexicano)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="news_category" class="form-label">Categoría de Noticias</label>
+                                <select class="form-select" id="news_category" name="news_category">
+                                    <option value="general" {% if config.news_category == 'general' %}selected{% endif %}>General</option>
+                                    <option value="business" {% if config.news_category == 'business' %}selected{% endif %}>Negocios</option>
+                                    <option value="technology" {% if config.news_category == 'technology' %}selected{% endif %}>Tecnología</option>
+                                    <option value="sports" {% if config.news_category == 'sports' %}selected{% endif %}>Deportes</option>
+                                    <option value="health" {% if config.news_category == 'health' %}selected{% endif %}>Salud</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="news_country" class="form-label">País para Noticias</label>
+                                <select class="form-select" id="news_country" name="news_country">
+                                    <option value="ar" {% if config.news_country == 'ar' %}selected{% endif %}>Argentina</option>
+                                    <option value="mx" {% if config.news_country == 'mx' %}selected{% endif %}>México</option>
+                                    <option value="co" {% if config.news_country == 'co' %}selected{% endif %}>Colombia</option>
+                                    <option value="es" {% if config.news_country == 'es' %}selected{% endif %}>España</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Horarios de Publicación -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Horarios de Publicación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="tweet_schedule_weather" class="form-label">Horarios Clima</label>
+                        <input type="text" class="form-control" id="tweet_schedule_weather" 
+                               name="tweet_schedule_weather" value="{{ config.tweet_schedule_weather }}" 
+                               placeholder="08:00,14:00,20:00">
+                        <div class="form-text">Formato: HH:MM separados por comas</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tweet_schedule_currency" class="form-label">Horarios Moneda</label>
+                        <input type="text" class="form-control" id="tweet_schedule_currency" 
+                               name="tweet_schedule_currency" value="{{ config.tweet_schedule_currency }}" 
+                               placeholder="09:00,15:00">
+                        <div class="form-text">Formato: HH:MM separados por comas</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tweet_schedule_news" class="form-label">Horarios Noticias</label>
+                        <input type="text" class="form-control" id="tweet_schedule_news" 
+                               name="tweet_schedule_news" value="{{ config.tweet_schedule_news }}" 
+                               placeholder="12:00,18:00">
+                        <div class="form-text">Formato: HH:MM separados por comas</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Límites de Twitter Free Tier:</strong><br>
+                        Máximo 1,500 tweets por mes. Planifica cuidadosamente los horarios.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary me-md-2" onclick="window.location.reload()">
+                    <i class="fas fa-undo me-1"></i>Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Guardar Configuración
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testConnections() {
+    // Aquí podrías implementar tests de conexión para las APIs
+    alert('Funcionalidad de prueba de conexiones en desarrollo');
+}
+
+// Validación de formulario
+document.querySelector('form').addEventListener('submit', function(e) {
+    const requiredFields = ['twitter_consumer_key', 'twitter_consumer_secret', 
+                           'twitter_access_token', 'twitter_access_token_secret'];
+    
+    let hasErrors = false;
+    requiredFields.forEach(field => {
+        const input = document.getElementById(field);
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            hasErrors = true;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (hasErrors) {
+        e.preventDefault();
+        alert('Por favor completa todas las credenciales de Twitter requeridas.');
+    }
+});
+</script>
+{% endblock %}

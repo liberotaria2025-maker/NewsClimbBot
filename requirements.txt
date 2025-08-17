@@ -1,0 +1,10 @@
+tweepy
+requests
+poetry add schedule
+flask
+flask-sqlalchemy
+requests
+schedule
+sqlalchemy
+tweepy
+werkzeug
