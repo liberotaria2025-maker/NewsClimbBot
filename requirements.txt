@@ -1,10 +1,6 @@
-tweepy
-requests
-poetry add schedule
-flask
-flask-sqlalchemy
-requests
-schedule
-sqlalchemy
-tweepy
-werkzeug
+tweepy==4.14.0
+schedule==1.2.0
+flask==3.0.3
+python-dotenv==1.0.1
+requests==2.32.3
+beautifulsoup4==4.12.3
