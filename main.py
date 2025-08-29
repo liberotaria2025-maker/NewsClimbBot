@@ -12,9 +12,9 @@ BEARER_TOKEN = os.getenv("AAAAAAAAAAAAAAAAAAAAAOBt3gEAAAAAnc149k6%2Bwr2iN%2FtU00
 client = tweepy.Client(
     bearer_token=BEARER_TOKEN,
     consumer_key=API_KEY,
-    consumer_secret=API_SECRET,
+    consumer_secret=API_KEY_SECRET,
     access_token=ACCESS_TOKEN,
-    access_token_secret=ACCESS_SECRET
+    access_token_secret=ACCESS_TOKEN_SECRET
 )
 
 # === Palabra clave a buscar ===
