@@ -1,131 +1,38 @@
-import os
-import time
-import random
+import snscrape.modules.twitter as sntwitter
 import requests
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
-import tweepy
-import schedule
-from flask import Flask
+import os
 
-# =============================
-# 🔑 Autenticación con Twitter
-# =============================
-load_dotenv()
+# ⚠️ Las claves las cargás en Render como Environment Variables
+BUFFER_TOKEN = os.getenv("1956489748622495744-BBqpYo75NYT5ksTRO8YWN6s966vZok")
+PROFILE_ID = os.getenv("Q3FWSjNoVGMwNUc5bHRjb0VkcEM6MTpjaQ")
 
-API_KEY = os.getenv("API_KEY")
-API_SECRET_KEY = os.getenv("API_SECRET_KEY")
-ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
-ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
-BEARER_TOKEN = os.getenv("BEARER_TOKEN")
+# Palabra clave a buscar
+PALABRA = "vllc"
 
-client = tweepy.Client(
-    bearer_token=BEARER_TOKEN,
-    consumer_key=API_KEY,
-    consumer_secret=API_SECRET_KEY,
-    access_token=ACCESS_TOKEN,
-    access_token_secret=ACCESS_TOKEN_SECRET
-)
+def buscar_tuits(palabra, limite=3):
+    """Busca tuits que contengan la palabra clave."""
+    tuits = []
+    for i, tweet in enumerate(sntwitter.TwitterSearchScraper(palabra).get_items()):
+        if i >= limite:
+            break
+        tuits.append(tweet.content)
+    return tuits
 
-user = client.get_me()
-print(f"✅ Autenticado como: {user.data.username}")
+def publicar_en_buffer(texto):
+    """Publica un texto en Buffer."""
+    url = "https://api.bufferapp.com/1/updates/create.json"
+    data = {
+        "text": texto,
+        "profile_ids[]": PROFILE_ID,
+        "now": True
+    }
+    headers = {"Authorization": f"Bearer {BUFFER_TOKEN}"}
+    res = requests.post(url, data=data, headers=headers)
+    print("Respuesta Buffer:", res.json())
 
-# =============================
-# 🎯 Hashtags
-# =============================
-HASHTAGS = {
-    "clima": ["#Clima", "#MarDelPlata", "#Argentina", "#Tiempo"],
-    "dolar": ["#Dólar", "#Economía", "#Argentina", "#Finanzas"],
-    "noticia": ["#Noticias", "#Argentina", "#Actualidad", "#Info"]
-}
-
-def elegir_hashtags(tipo):
-    return " ".join(random.sample(HASHTAGS[tipo], 2))
-
-# =============================
-# 🌦 Funciones
-# =============================
-def get_clima():
-    url = "https://wttr.in/Mar+del+Plata?format=3"
-    try:
-        clima = requests.get(url).text.strip()
-        return clima
-    except:
-        return "No se pudo obtener el clima."
-
-def get_dolar():
-    url = "https://dolarhoy.com/"
-    try:
-        resp = requests.get(url).text
-        soup = BeautifulSoup(resp, "html.parser")
-        compra = soup.find("div", {"class": "val"}).text
-        venta = soup.find_all("div", {"class": "val"})[1].text
-        return f"Dólar hoy: Compra {compra} | Venta {venta}"
-    except:
-        return "No se pudo obtener la cotización del dólar."
-
-def get_noticia():
-    url = "https://www.lanacion.com.ar/ultimas-noticias/"
-    try:
-        resp = requests.get(url).text
-        soup = BeautifulSoup(resp, "html.parser")
-        titulo = soup.find("h2").text.strip()
-        return f"📰 {titulo}"
-    except:
-        return "No se pudo obtener la noticia."
-
-# =============================
-# 🐦 Tuits automáticos
-# =============================
-def post_clima():
-    texto = get_clima()
-    tweet = f"{texto} {elegir_hashtags('clima')}"
-    client.create_tweet(text=tweet)
-    print(f"✅ Tweet Clima: {tweet}")
-
-def post_dolar():
-    texto = get_dolar()
-    tweet = f"{texto} {elegir_hashtags('dolar')}"
-    client.create_tweet(text=tweet)
-    print(f"✅ Tweet Dólar: {tweet}")
-
-def post_noticia():
-    texto = get_noticia()
-    tweet = f"{texto} {elegir_hashtags('noticia')}"
-    client.create_tweet(text=tweet)
-    print(f"✅ Tweet Noticia: {tweet}")
-
-# =============================
-# ⏰ Programación de tareas
-# =============================
-schedule.every(7).hours.do(post_clima)      # Clima cada 7 horas
-schedule.every(3).hours.do(post_dolar)      # Dólar cada 3 horas
-schedule.every(50).minutes.do(post_noticia) # Noticias cada 50 minutos
-
-print("🤖 Bot iniciado. Esperando tareas...")
-
-# =============================
-# 🌍 Flask para mantener vivo
-# =============================
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "🤖 Bot de Twitter corriendo!"
-
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        print("⏳ Esperando...")
-        time.sleep(60)
-
-if __name__ == "__main__":
-    import threading
-    threading.Thread(target=run_scheduler).start()
-    app.run(host="0.0.0.0", port=5000)
-if __name__ == "__main__":
-    # Inicia el bot en segundo plano
-    threading.Thread(target=ejecutar_bot, daemon=True).start()
-
-    # Levanta un servidor Flask para mantener vivo el repl
-    app.run(host="0.0.0.0", port=5000)
+if _name_ == "_main_":
+    print("🔍 Buscando tuits con la palabra:", PALABRA)
+    tuits = buscar_tuits(PALABRA, limite=2)  # busca 2 tuits
+    for tuit in tuits:
+        print("Encontrado:", tuit[:80], "...")
+        publicar_en_buffer(tuit)
