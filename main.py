@@ -31,5 +31,5 @@ def buscar_y_retweet():
             except Exception as e:
                 print(f"Error con tweet {t.id}: {e}")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     buscar_y_retweet()
