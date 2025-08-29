@@ -3,9 +3,9 @@ import os
 
 # === Cargar claves desde variables de entorno ===
 API_KEY = os.getenv("7uhvGASTQkWwE2BWHVN4iETNO")
-API_SECRET = os.getenv("Wg9ggAZjwiCn4hv4HExd2kKBYyE16bMF4AKBqReTszhvn0gvtb")
+API_KEY_SECRET = os.getenv("Wg9ggAZjwiCn4hv4HExd2kKBYyE16bMF4AKBqReTszhvn0gvtb")
 ACCESS_TOKEN = os.getenv("1956489748622495744-BBqpYo75NYT5ksTRO8YWN6s966vZok")
-ACCESS_SECRET = os.getenv("3K4i9odmt3l0p15QjL9hTMa8DBUzYSnvKtfJBiGcmCdtf")
+ACCESS_TOKEN_SECRET = os.getenv("3K4i9odmt3l0p15QjL9hTMa8DBUzYSnvKtfJBiGcmCdtf")
 BEARER_TOKEN = os.getenv("AAAAAAAAAAAAAAAAAAAAAOBt3gEAAAAAnc149k6%2Bwr2iN%2FtU003xFTBq4EE%3DIE2bAWyaInOw8FjvFWdNxOGp35plpsypFHr3htA0wVjejUMLi2")
 
 # === Autenticación ===
