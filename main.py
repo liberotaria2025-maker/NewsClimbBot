@@ -1,38 +1,35 @@
-import snscrape.modules.twitter as sntwitter
-import requests
+import tweepy
 import os
 
-# ⚠️ Las claves las cargás en Render como Environment Variables
-BUFFER_TOKEN = os.getenv("1956489748622495744-BBqpYo75NYT5ksTRO8YWN6s966vZok")
-PROFILE_ID = os.getenv("Q3FWSjNoVGMwNUc5bHRjb0VkcEM6MTpjaQ")
+# === Cargar claves desde variables de entorno ===
+API_KEY = os.getenv("7uhvGASTQkWwE2BWHVN4iETNO")
+API_SECRET = os.getenv("Wg9ggAZjwiCn4hv4HExd2kKBYyE16bMF4AKBqReTszhvn0gvtb")
+ACCESS_TOKEN = os.getenv("1956489748622495744-BBqpYo75NYT5ksTRO8YWN6s966vZok")
+ACCESS_SECRET = os.getenv("3K4i9odmt3l0p15QjL9hTMa8DBUzYSnvKtfJBiGcmCdtf")
+BEARER_TOKEN = os.getenv("AAAAAAAAAAAAAAAAAAAAAOBt3gEAAAAAnc149k6%2Bwr2iN%2FtU003xFTBq4EE%3DIE2bAWyaInOw8FjvFWdNxOGp35plpsypFHr3htA0wVjejUMLi2")
 
-# Palabra clave a buscar
-PALABRA = "vllc"
+# === Autenticación ===
+client = tweepy.Client(
+    bearer_token=BEARER_TOKEN,
+    consumer_key=API_KEY,
+    consumer_secret=API_SECRET,
+    access_token=ACCESS_TOKEN,
+    access_token_secret=ACCESS_SECRET
+)
 
-def buscar_tuits(palabra, limite=3):
-    """Busca tuits que contengan la palabra clave."""
-    tuits = []
-    for i, tweet in enumerate(sntwitter.TwitterSearchScraper(palabra).get_items()):
-        if i >= limite:
-            break
-        tuits.append(tweet.content)
-    return tuits
+# === Palabra clave a buscar ===
+KEYWORD = "VLLC"  # <-- cambia por la palabra que quieras
 
-def publicar_en_buffer(texto):
-    """Publica un texto en Buffer."""
-    url = "https://api.bufferapp.com/1/updates/create.json"
-    data = {
-        "text": texto,
-        "profile_ids[]": PROFILE_ID,
-        "now": True
-    }
-    headers = {"Authorization": f"Bearer {BUFFER_TOKEN}"}
-    res = requests.post(url, data=data, headers=headers)
-    print("Respuesta Buffer:", res.json())
+def buscar_y_retweet():
+    # Buscar tweets recientes con la palabra
+    tweets = client.search_recent_tweets(query=KEYWORD, max_results=10)
+    if tweets.data:
+        for t in tweets.data:
+            try:
+                client.retweet(t.id)
+                print(f"Retuiteado: {t.text}")
+            except Exception as e:
+                print(f"Error con tweet {t.id}: {e}")
 
 if _name_ == "_main_":
-    print("🔍 Buscando tuits con la palabra:", PALABRA)
-    tuits = buscar_tuits(PALABRA, limite=2)  # busca 2 tuits
-    for tuit in tuits:
-        print("Encontrado:", tuit[:80], "...")
-        publicar_en_buffer(tuit)
+    buscar_y_retweet()
