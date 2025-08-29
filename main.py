@@ -2,7 +2,7 @@ import tweepy
 import os
 
 # Solo se necesita el Bearer Token en el plan Free
-BEARER_TOKEN = os.getenv("AAAAAAAAAAAAAAAAAAAAAOBt3gEAAAAAnc149k6%2Bwr2iN%2FtU003xFTBq4EE%3DIE2bAWyaInOw8FjvFWdNxOGp35plpsypFHr3htA0wVjejUMLi2")
+BEARER_TOKEN = os.getenv("AAAAAAAAAAAAAAAAAAAAAOBt3gEAAAAAaVontg%2FKMnkRjiPL03yPm8sNidw%3D26GuqBbnSqLgS4poaI58wGmNc6TpKsXrgPRfWfMRrhK3dOcyHr")
 
 client = tweepy.Client(bearer_token=BEARER_TOKEN)
 
